@@ -1,0 +1,375 @@
+---
+title: "The Wolf's Return"
+author: "Phoebe Nicault"
+date: "April 26th, 2024"
+output:
+  html_document:
+    toc: true
+toc-title: "Table of Contents"
+---
+
+
+```{r packages, include=FALSE,echo=F}
+library(readr)
+library(leaflet)
+library(ggplot2)
+library(maps)
+library(mapdata)
+library(rworldmap)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(sf)
+library(dplyr)
+library(mapview)
+
+
+```
+
+```{r grabdata,echo=FALSE}
+LivePlanetIndex <- read.csv("LivePlanetIndex.csv")
+new_names <- paste0(1950:2020)
+names(LivePlanetIndex)[34:104] <- new_names
+# View(LivePlanetIndex)
+filtered_df <- LivePlanetIndex[LivePlanetIndex$Binomial == "Canis_lupus", ]
+included_colnames <- c("Estimated number of individuals",
+                   "Estimated population",
+                   "Estimated population size",
+                   "Individuals",
+                   "Minimum population",
+                   "number of individuals",
+                   "Number of wolves",
+                   "Population estimate",
+                   "Population size")
+standardized_pop <- filtered_df[filtered_df$Units %in% included_colnames, ]
+transposed = t(standardized_pop)
+year_data = as.data.frame(transposed[34:length(rownames(transposed)),])
+
+```
+
+```{r plots,echo=FALSE}
+plot <- function(index, title_arg, ann_arg) {
+  UNIT = 32
+  ID = 1
+  COUNTRY = 16
+  METHOD = 33
+  LOCATION = 14
+  if (missing(title_arg)) {
+    title = paste("Population Trends in",transposed[LOCATION,index],"")
+  } else {
+    title = title_arg
+  }
+  if (missing(ann_arg)) {
+    ann = paste("Method: ",transposed[METHOD,index])
+  } else {
+    ann = ann_arg
+  }
+  
+  df <- data.frame(
+    pops = as.numeric(rownames(year_data[year_data[, index] != "NULL", ])),
+    years = as.numeric(year_data[year_data[,index] != "NULL", index])
+  )
+ suppressWarnings(ggplot(df, aes(x = pops, y = years)) +
+    geom_point() +
+    stat_smooth(method="loess", formula=y~x, color="black") +
+    labs(x = "Year", y = paste("Population (",transposed[UNIT,index],")")) +
+    ggtitle(title)+
+      annotate("text", x = Inf, y = Inf, label = ann,
+             color = "black", size = 5, fontface = "bold", 
+             box.color = "gray", box.size = 0.5, 
+             hjust = 1, vjust = 1))+
+   theme_classic()
+}
+```
+
+# Introduction
+
+Unlike any other species, the gray wolf (*Canis Lupus*) has captivated the minds of humans for centuries. Wolves play a crucial role in maintaining the balance of the ecosystem. Wolves do this through the regulation of prey, improving habitat health, and enhancing ecosystem resilience. Wolves help regulate the population of their prey, such as elk, moose and deer by keeping their populations down which prevents overgrazing and overpopulation of species which can have a significant impact on vegetation, ecosystem health and balance. Wolves help reduce pressure from herbivores on the land by helping control their numbers through predation. This helps decrease the risk of soil erosion and loss of plant species diversity which helps to improve habitat health, benefiting other species in the area. For example, a reduction in elk populations can lead to increased vegetation growth, which benefits beavers, songbirds and other species. By helping maintain this balance among species and preventing the dominance of any single species, wolves contribute to ecosystem resilience which is crucial for ecosystems to withstand disturbances such as climate change and habitat loss. ([23](https://isleroyalewolf.org/data/data/home.html#:~:text=Five%20decades%20of%20wolf%2Dmoose%20dynamics&text=In%201980%20the%20wolf%20population,unexpected%20outbreak%20of%20moose%20ticks.), [11](https://cdnsciencepub.com/doi/pdf/10.1139/z01-094))
+
+This project aims to offer a comprehensive overview of global wolf population trends, serving as a valuable resource for both current understanding and future research endeavors of wolves around the world. By analyzing and visualizing data from the Living Planet Index, the project seeks to identify countries with significant data gaps, and low or declining wolf populations. Through trend graphs created from the Living Planet Index data, this project works to highlight patterns and shifts in wolf populations over time. By examining these trends, researchers and conservationists can gain insights into the factors influencing wolf populations, such as habitat loss, human-wildlife conflict, climate change, and conservation efforts. By identifying areas where wolf populations are particularly vulnerable and where further research is needed, this project can inform conservation strategies and initiatives aimed at protecting wolf populations and their habitats. ([30](https://www.livingplanetindex.org/search))
+
+![](images/wolves.jpeg)
+
+## The Importance of Connection: Isle Royale National Park, Michigan
+
+Wolves first arrived in Isle Royale in the winter of 1948 by crossing an ice bridge from Canada. Research has led us to believe that they have been isolated since. After arriving in Isle Royale, their population has varied from 50 wolves to as little as two. In the 1980's there was a massive decline in the population which continued through the early 90s and was primarily due to human introduced disease called canine-parvovirus. This was a major threat to the population of wolves on this island. Another threat to the well being of this pack was inbreeding since the population was so small and isolated. The decline in the wolf population that can be observed on the graph bellow is due to the combination of disease and inbreeding, but what stopped it? ([2](#0), [21](http://www.jstor.org/stable/26047757))
+
+![](images/Screen%20Shot%202024-04-23%20at%2010.55.14%20AM.png)
+
+In 1997, a lone wolf from Canada wandered across the ice bridge that had initially brought wolves to Isle Royal so many years ago. This was a miracle for the wolves of Isle Royale and the dramatic increase that can be seen on the graph below is a result of this event. The wolf, known as number 93 (aka "old grey guy"), served as the new genes that were needed to save the wolf population. In about five years, inbreeding rates dropped dramatically. But, this only lasted so long. Eventually wolf no. 93's genes began to take over. The question of whether the arrival of no. 93 improved wolf demography has a complicated answer.
+
+Generally, the arrival of no. 93 caused wolf abundance to increase in Isle Royale. But, that increase was inconsistent. It is important to note that this increase happened at a time where the number of moose on Isle Royale was declining rapidly. Moose are an important indicator of food availability for wolves in this area so a decline in wolves would have been expected. Therefore, researchers are confident that the arrival of wolf no. 93 is the reason why the wolf population showed an increase at this time. Research at Isle Royale has been very important for understanding how wolves affect the populations of their prey and how the health of packs is affected by inbreeding and genetics.
+
+The story of wolves arriving and surviving in Isle Royale National park shows how humans and wolves have interacted throughout history. It highlights the importance for wolf packs to be connected to other packs and how this is vital for wolf populations to survive and thrive. Additionally this story illistrates the importance of understanding the mechanism behind population trends and how individual stories are important to getting the full picture. ([2](https://isleroyalewolf.org/data/data/home.html#:~:text=Five%20decades%20of%20wolf%2Dmoose%20dynamics&text=In%201980%20the%20wolf%20population,unexpected%20outbreak%20of%20moose%20ticks.), [21](http://www.jstor.org/stable/26047757))
+
+#### Population Trends in Isle Royale National Park, USA
+
+```{r United States, echo=FALSE, fig.cap="Figure 1"}
+plot(index = 2, title_arg = "")
+```
+
+# The Global Picture of Wolf Populations
+
+In some places wolf populations are doing well but in other, they are not. Using the LPI we can observe these trends around the world. The map below shows countries around the world and their most recent reported number of wolves. The red dots show the places that need attention due to either decreasing populations or concerns with the existing data. The green dots indicate that the population is increasing or have a robust population and therefor are stable. Wolf populations are different in every country and have different influencing factors so it is important to investigate each country seperate in addition to looking at them on a global scale.
+
+```{r map, echo=FALSE}
+#select only pop data
+Popstats <- c("Isle Royale National Park, USA", "Denali National Park, Alaska", "Western Alps", "Romania", "Belarussian part of Bialowieza Primeval Forest", "Lithuania", "Switzerland", "Finland", "Norway", "Sweden", "Albania", "Slovenia", "France")
+
+filtered_df_trim <- dplyr::filter(filtered_df, Location %in% Popstats)
+
+# Information for each country
+country_info <- list(
+  "Isle Royale National Park, USA" = "Wolf count: 20 (2003)",
+  "Denali National Park, Alaska" = "Wolf count: 80 (1998)",
+  "Norway" = "Wolf count: 75 (2018)",
+  "Albania" = " Wolf count: 1,500 (2000)",
+  "Western Alps" = "Wolf count: 25 (2005)",
+  "Lithuania" = "Wolf count: 200 (2001)",
+  "Sweden" = "Wolf count: 300 (2018)",
+  "France" = "Wolf count: 300 (2016)",
+  "Romania" = "Wolf count: 2,800 (2016)",
+  "Belarussian part of Bialowieza Primeval Forest" = "Wolf count: 25 (1991)",
+  "Switzerland" = "Wolf count: 300 wolves (2020)",
+  "Finland" = "Wolf count: 150 (2010)",
+  "Slovenia" = "Wolf count: 115 (2020)"
+)
+
+# Add a new column to your data indicating whether the location should be red
+red_locations <- c("Denali National Park, Alaska", "Norway", "Albania", "Western Alps", "Lithuania")
+filtered_df_trim$color <- ifelse(filtered_df_trim$Location %in% red_locations, "red", "forestgreen")
+
+filtered_df_trim$Latitude <- as.numeric(filtered_df_trim$Latitude)
+filtered_df_trim$Longitude <- as.numeric(filtered_df_trim$Longitude)
+
+# Create the leaflet map with conditional styling
+map <- leaflet(filtered_df_trim) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircleMarkers(
+    lng = ~Longitude, 
+    lat = ~Latitude,
+    popup = ~paste0(Location, "<br>", country_info[Location]),
+    label = ~Location,
+    labelOptions = labelOptions(direction = "auto"),
+    color = ~color,  
+    fillColor = ~color  
+  ) %>%
+  addLegend(
+    position = "bottomleft",
+    colors = c("red", "forestgreen"),
+    labels = c("Populations that need attention", "Populations that are doing okay"),
+    opacity = 1
+  )
+
+# Print the map
+map
+```
+
+# Populations That Need Attention
+
+## Low population numbers or a decreasing trend:
+
+### Population Trends in Denali National Park, Alaska
+
+```{r Alaska, echo=F, fig.cap="Figure 2"}
+plot(index = 3, title_arg = "")
+```
+
+Denali National Park is recognized as one of the best places to view wolves in the wild in the world. Wolf viewing provides high economic value for Denali National Park and therefore it is important for the park to have a thriving population of wolves. But, the LPI only has population data between around 1985 to around 1998. Additionally, in this time period the data suggest that the wolf population was decreasing. Because of this, further research needs to be conducted to investigate the state of wolves in Denali National Park.
+
+Further research on the current state of wolves in Denali reveals that between the years of 2000 to 2010, the Alaska Board of Game approved the closure of certain areas outside of the eastern region of Denali National Park. This is referred to as the buffer zone and allows wolf hunting and trapping year round in order to protect wolf viewing opportunities in the park. In 2010, the buffer zone was eliminated. In 2017, the National Park Service submitted a proposal to reinstate the buffer zone but it was not approved. Today, there is no habitat buffer zone.
+
+The findings from a five-year study carried out by the National Park Service and the Alaska Department of Fish and Game (Borg 2015) revealed a notable rise in wolf sightings within Denali National Park between 2000 and 2010, compared to the periods immediately preceding and following the establishment of the buffer zone. Furthermore, during the buffer zone's existence, there was an observed increase in the average harvest of wolves in the areas adjacent to Denali National Park. Consequently, the presence of the buffer zone created enhanced opportunities for both consumptive users, such as hunters, and non-consumptive users, such as wildlife viewers.
+
+Since the buffer zone was eliminated, wolf sightings have dramatically decreased, from 44% in 2010 to only 4% 2013. Moreover, the wolf population in the Park declined by almost 50% from around 143 wolves in 2007 to just 75 in 2018. While the LPI doesn't have population data for the years after 1998 there have been other studies conduced on the population trends in Denali that have found that the population is significantly decreasing. ([23](https://isleroyalewolf.org/data/data/home.html#:~:text=Five%20decades%20of%20wolf%2Dmoose%20dynamics&text=In%201980%20the%20wolf%20population,unexpected%20outbreak%20of%20moose%20ticks.))
+
+### Population Trends in Norway
+
+```{r Norway, messages=F, echo=FALSE, fig.cap="Figure 3"}
+plot(index = 26,title_arg = "", ann_arg = "Method: Genetic sampling, GPS tracking and dead recovery data")
+```
+
+Even thought Norway has vast areas of habitat that are suitable for wolves, they have one of Europe's smallest populations of wolves. Throughout history, there has been a lot of controversy around wolves in the country. One of the main reasons for this is because there are nearly 2 million free grazing sheep in Norway and the government does not provide compensation for losses caused by wolf predation. Research has shown that the wolves in Norway live almost exclusively off wild ungulates such as moose and it has been proven that predators are only a small part of the reason why sheep die during free grazing in the summer. Nearly 80 percent of sheep death is due to other causes such as accidents, infections, diseases, parasites and poisonous plants. In total, wolves cause less than two percent of the annual sheep mortality. ([3](https://www.jstor.org/stable/26623743), [24](https://www.wwf.no/dyr-og-natur/truede-arter/ulv-i-norge/rettssak-for-ulven/save-our-wolves))
+
+Regardless of this and the fact that wolves are considered an endangered species in Norway, in the winter of 2019, 43 of the approximately 70 wolves were meant to be culled. This led to many protests from wolf supporters led by the animal rights group NOAH in Oslo. They mobilized nearly 7,000 protesters in Oslo and five other cities to object against the culls. This eventually led to The Norwegian Parliament decided to implement a 'wolf zone.' This zone only accounts for less than five percent of Norway's total land area so if wolf wanders outside this zone, citizens may ask for permission to shoot it and it is usually granted quickly. Additionally, Norwegian authorities authorize the hunting of a significant portion of the wolf population each year. Hunting is a serious threat to wolf populations in Norway. ([24](https://www.wwf.no/dyr-og-natur/truede-arter/ulv-i-norge/rettssak-for-ulven/save-our-wolves))
+
+In 2017, the World Wide Fund for Nature (WWF) sued the Norwegian government for illegal wolf management. The WWF claimed that the governments management practice violates the national Nature Diversity Act, the Bern Convention and the Norwegian Constitution. But in 2018, the WWF lost in Oslo District Court and the Supreme Court established that the Norwegian government had acted in compliance with both the Biodiversity Act and the Bern Convention. ([24](https://www.wwf.no/dyr-og-natur/truede-arter/ulv-i-norge/rettssak-for-ulven/save-our-wolves))
+
+The WWF still believes that the Norwegian management of wolves violates the the Nature Diversity Act, the Bern Convention and Norwegian Constitution. They believe that management is not based on science, but rather political motives to keep both conversationalists and farmers happy. While there has been efforts to protect the wolves of Norway, data from the LPI reveals that the populations are still low and there is not much data and therefor it is important that further research be conducted on this population. ([24](https://www.wwf.no/dyr-og-natur/truede-arter/ulv-i-norge/rettssak-for-ulven/save-our-wolves))
+
+### Population Trends in Lithuania
+
+```{r Lithuania, echo=FALSE, fig.cap="Figure 4"}
+plot(index = 22, title_arg = "")
+```
+
+The data from the LPI and other resources indicate that around 2007 there were between 200-300 wolves in Lithuania but these numbers could potentially be misleading do to a lack of official monitoring. For example, the data used for this trend graph was gathered through surveys conduced by hunters and foresters. While this method may give a general idea of the population of wolves it is very much up to interpretation. Because there is a clear gap in the data on wolf populations in Lithuania, it is essential that future research be conducted to fill this gap. ([2](https://www.cabidigitallibrary.org/doi/full/10.5555/20083047975))
+
+## Data Concerns
+
+### Population Trends in Albania
+
+```{r Albania, echo=FALSE, fig.cap="Figure 5"}
+plot(index = 28, title_arg = "", ann_arg = "Method: Interviewing local shepards, hunters and foresters")
+```
+
+Similar to data collection in Lithuania, the population data in Albania was obtained by interviewing local people such as shepherds, hunters and foresters. Because of this, it is crucial that further research be conducted to collect population data in Albania and analyze the data. While the data shows a decline, it may not be full accurate do to how the data was collected. This reveals a data gap where future research needs to be conduced to fill this gap.
+
+### Population Trends in the Western Alps (Italy/France)
+
+```{r Italy/France, echo=FALSE, fig.cap="Figure 6"}
+plot(index = 4, title_arg = "")
+```
+
+This data from the LPI is of particular significance because it was the first time that capture-recapture sampling was used in the Western Alps to asses the wolf population trends and survival rates at large spatial scales. Additionally, this data provides the first such estimates for wolves in the Western Alps and therefor has important management implications. This method is now widely used in research and is often applied to broader spatial and temporal scales for other species in Europe. At the beginning of the 21st century a major research gap was the lack of accurate and cost effective techniques for measure abundance of large carnivorous species such as wolves. Therefore, the capture-recapture framework was created. ([11](http://www.jstor.org/stable/25623080))
+
+The capture-recapture method involves the 'capturing' of individuals from camera trap photos or DNA from scat collected in the field. Genetic markers from the scat is used to track individuals over time. This method can be used to accurately estimate population size, trends and survival rates. The data has led researchers to believe that after nearly 70 years, wolves have begun to recolonize the Western Alps through dispersal from the from the Apennines. ([12](https://www.lifewolfalps.eu/en/the-wolf-in-the-alps/the-wolf-in-the-french-alps/), [11](http://www.jstor.org/stable/25623080))
+
+While this data indicates an important step in the investigation of wolf populations in the Western Alps, the data only covers a time period of around four years and therefor it is vital that researchers continue to use this method of data collection to allow the well-being of wolves in the Western Alps be studied and therefor protected.
+
+### Population Trends in Sweden
+
+```{r Sweden, echo=FALSE, fig.cap="Figure 7"}
+plot(index = 27, title_arg = "", ann_arg = "Method: Genetic sampling, GPS tracking and dead recovery data")
+```
+
+Throughout history, wolves have always been hunted for their fur. This eventually led to their extinction in the 1960s. In the beginning of the 1980s, three wolves migrated from the Russian-Finnish population. This was the beginning of the modern wolf population. Eventually these individuals multiplied successfully into nearly 200 wolves. Since then a few more wolves have migrated from the Russian-Finnish population, which has been shown to be an important contribution to the success of the population. ([11](https://cdnsciencepub.com/doi/pdf/10.1139/z01-094))
+
+Sweden shares its wolf population with Norway which inevitably causes fluctuations in the population due to human-wolf conflicts in Norway. This explains why the trends between 2012 and 2018 are very similar in the two countries. The wolf populations in Sweden and Norway are managed separately. For example, Sweden is part of the European Union while Norway is not. This creates differences and challenges in managing this shared population and could help to explain why the population in Sweden is much greater. ([14](https://wolf.org/wow/europe/sweden/), [11](https://cdnsciencepub.com/doi/pdf/10.1139/z01-094), [25](https://wolf.org/wow/europe/sweden/))
+
+While this data shows that there is an abundant population of wolves in Sweden, the data only includes seven years of data. Additionally there is only data up until 2018. Because of this, there needs to be further research and data collection in order to draw conclusions about the population trends of wolves in Sweden and for conservationist to develop a plan to protect the populations.
+
+## Populations that are doing okay
+
+### Population Trends in France
+
+```{r France, echo=FALSE, fig.cap="Figure 8"}
+plot(index = 30, title_arg = "")
+```
+
+By the 1930's wolves were fully extinct in France. In 1992 recolonization began when two individuals were spotted in the Mercantour National Park in 1992. There is genetic evidence which reveals that the wolves came from the wolf population in Italy, which had recovered about 20 years after the international protection in the 1970s. Since the reorganization of the country, wolves have expanded to most alpine environments in France.
+
+Wolves are now a strictly protected species in France. A management place for the *Canis Lupus* species had been in place since 2004. The country has in place a program to protect livestock and compensates farmers for losses due to wolf predation. A 13% growth rate has been calculated for the species in France.
+
+The main threat to the conservation of wolves in France is undoubtedly the threat they pose to livestock, particularly sheep grazing in alpine pastures. Additionally, hunters worry about the effect that wolves have on the behavior and distribution of wild prey. While the wolf population in France seems to be increasing at a healthy rate, the countries efforts to promote wolf recovery receives push back. [12](https://www.lifewolfalps.eu/en/the-wolf-in-the-alps/the-wolf-in-the-french-alps/)
+
+### Population Trends in Romania
+
+```{r Romania, echo=FALSE, fig.cap="Figure 9"}
+plot(index = 19, title_arg = "", ann_arg = "Method: Track counts and scat deposition along a transect")
+```
+
+Romania's Southern Carpathian mountains are often referred to as Europe's Yellowstone because it has one of the largest wolf populations in Europe. But still, the wolf population in Romania is notably understudied. As of 2018, the World Wildlife Fund estimates that there are 2,300 to 2,700, but official estimates have the number closer to 5,800. But it has been concluded that the wolf population in Romania shown an overall increasing trend. But there aren't many studies published with more recent data on the populations and trends of wolves in this part of the world. ([16](https://doi.org/10.1371/journal.pone.0225424), [17](https://wolf.org/wow/europe/romania/))
+
+In Romania, there exists multiple law protecting and conserving the large population of wolves that are present today. The legal framework that exist in include: the EU Habitat Directive (Annex II, IV), Law no. 407/2006 (Hunting Law) which states that wolves are protected, hunting them is forbidden unless you receive permission from the Ministry of the Environment and Sustainable Development and the Ministry of Agriculture and Rural Development, the Bern Convention, the Washington Convention and the EU Wildlife Trade Regulation. ([10](https://olomouc.hnutiduha.cz/data/publications/47.pdf#page=27), [35](https://doi.org/10.1371/journal.pone.0225424))
+
+Overall, it appears that there is little existing research on the status of wolves in Romania today, but the trend from the LPI data indicates that the population is increasing.
+
+### Population Trends in the Belarussion part of the Bialowieza Primeval Forest, Belarus
+
+```{r Belarus, echo=FALSE, fig.cap="Figure 10"}
+plot(index = 21, title_arg = "", ann_arg = "Method: Data from the State National Park Belovezhskaya Pushcha")
+```
+
+Wolves in the Bialowieza Primeval Forest (BPF) on the Belarus side have had an unstable history. Over the past century, wolves have been prosecuted on and off. Particularly during the period between 1946 and 1960. The steep decrease in the number of individuals shown on the graph illustrates this period of intense prosecution, at this point, wolf numbers reached zero. Around the 1970's wolves from the East began to recolonize the area. By the 1980's, wolf hunting was greatly reduced and by 1989 strict protection for the wolves was put into place and continues to the present day. [4](https://www.tomdiserens.com/wolves-in-bialowieza-forest/), [19](https://doi.org/10.2307/1383092),
+
+Currently, 40 percent of the BPF belongs to Poland and 60 percent belongs to Belarus. Ever since 1981, there has been a border fence that separates the countries and was built by the Soviets along their state border. Since 1977, the BPF has been a Man and Biosphere Reserve of the United Nations Environmental, Scientific and Cultural Organization and a World Heritage Site since 1979. In 1992 a small part of BPF has been strictly protected as the Bialowieza National Park (BNP). In 1966, this area was expanded from 47 km2 to 100km2. Ever since 1993, the entirety of the forest is recognized as a Man and Biosphere Reserve. ([19](https://doi.org/10.2307/1383092), [29](https://doi.org/10.1644/1545-1542(2000)081%3C0197:PSAPBW%3E2.0.CO;2))
+
+### Population Trends in Switzerland
+
+```{r Switzerland, echo=FALSE, fig.cap="Figure 11"}
+plot(index = 24, title_arg = "")
+```
+
+Between 1930 and 1960, wolves in the Swiss Alps were at an all-time low. Then in 1995, a lone male wolf wandered in across the Swiss-Italian border. A year later, the wolf was hunted and killed. A protection law was later put in place to protect the species and only allows them to be killed with permission from the state. Because of this, the wolf has been able to establish a presence in the Swiss Alps. In 2012, the first pack in over a century and a half was recorded near Chur. Three years later, a second pack was recorder. By 2020 there were said to be between 30-35 wolves in Switzerland. Today, if wolves kill 35 animals over a four-month period or prey on 25 animals in a single month, a hunting license is granted. After already fully disappearing once, it is still a difficult road back for the wolves in Switzerland due to deep rooted beliefs that exist within the minds of humans. ([16](https://theculturetrip.com/europe/switzerland/articles/a-brief-history-of-wolves-in-switzerland), [27](https://wolf.org/wow/europe/switzerland/))
+
+### Population Trends in Finland
+
+```{r Finland, echo=FALSE, fig.cap="Figure 12"}
+plot(index = 25, title_arg = "", ann_arg = "Method: Observations and radio tracking")
+```
+
+In 2017, the wolf population was shown to be declining with around 150-180 individuals according to the Natural Resources Institute of Finland. This is the most recent number that can be found on public resources so in order to better understand the current trends in Finland, further research and monitoring of the wolf population would be beneficial. ([8](https://wolf.org/wow/europe/finland/))
+
+### Population Trends in Slovenia
+
+```{r Slovenia, echo=FALSE, fig.cap="Figure 13"}
+plot(index = 29, title_arg = "", ann_arg = "Method: Mark and recapture")
+```
+
+Unlike many other countries in Europe, wolves never full disappeared from Slovenia. During the times with the most severe wolf prosecution, wolves were able to survive in remote parts of the Dinaric mountains. After the end of the world wars, the wolves populations began to expand.
+
+Wolves in Slovenia are under complete legal protection under the Nature Conservation Act, Environment Protection Act, Hunting Act, and Forest Act. In 2015, Slovenian Ministry for environment finances National wolf monitoring projects, and provides compensations for wolf damages and finances livestock damage prevention measures. ([18](http://www.jstor.org/stable/23730710), [28](https://www.lifewolfalps.eu/en/the-wolf-in-the-alps/the-wolf-in-slovenia/#:~:text=From%20then%20on%20the%20expansion,in%20Slovenia%20forming%2014%20packs))
+
+## Future Directions
+
+The goal of this project was to create trend graphs from the data on wolf populations around the globe from the Living Planet Index. This project aimed to briefly describe the trends and influencing factors of population trends for different countries around the world. The hope is that this research will serve as a foundation for future research on wolf populations around the globe.
+
+Population data of the species *Canis Lupus* was retrieved from the Living Planet Index. Data of all other species was excluded for the purpose of this project. Multiple countries did not have population data and therefor a trend graph was not included. Because of this, future research needs to be done looking at the missing countries. Additionally, some of the methods of data collection could be modified for more accurate measurements. For example, one method used to collect data was asking local farmers about the current wolf population. Based off the numbers shown, it seems like they greatly overestimated the numbers. Because of this it would be beneficial conduct further research on the accuracy of certain methods of data collection.
+
+Overall, this project serves as a unconditional tool for understanding the global status of wolf populations, in order to facilitate informed decision-making, and guiding future research and conservation efforts to ensure the long-term survival of wolves.
+
+## The Dataset
+
+The dataset came from the Living Planet Index (LPI) which is an indicator of global biodiversity. The Living Planet Index tracks changes in global biodiversity by monitoring trends in vertebrate populations around the world. It serves as an important indicator of the health of our planet's ecosystems. The data collected in the Living Planet Index come from various sources, including scientific studies, surveys, and monitoring programs. For the purpose of this research, wolf populations around the world from the LPI was used and all other species data was excluded. Note that trend graphs that had less than five points of data were excluded for the purpose of this project. ([30](https://www.livingplanetindex.org/search))
+
+## References
+
+1.  Adams, J. R., Vucetich, L. M., Hedrick, P. W., Peterson, R. O., & Vucetich, J. A. (2011). Genomic sweep and potential genetic rescue during limiting environmental conditions in an isolated wolf population. Proceedings: Biological Sciences, 278(1723), 3336--3344.<http://www.jstor.org/stable/41315078> 
+
+2.  Balčiauskas, L., Volodka, H., & Kazlauskas, M. (2007). Wolf conservation and acceptance: comparison of South East Lithuania and North East Poland. <https://www.cabidigitallibrary.org/doi/full/10.5555/20083047975>  
+
+3.  Bazilchuk, N. (2019). Norway culls wolves amid howls of protest. Frontiers in Ecology and the Environment, 17(2), 77--77.<https://www.jstor.org/stable/26623743>  
+
+4.  Diserens, T. (2023, November 26). Wolves in Białowieża Forest.<https://www.tomdiserens.com/wolves-in-bialowieza-forest/>
+
+5.  Denali Wolf Buffer. Alaska Wildlife Alliance (AWA). (n.d.). <https://www.akwildlife.org/denali-wolf-buffer>  
+
+6.  Facts about Wolves - Wildsweden - Wildlife Adventures in Sweden. WildSweden. (n.d.). <https://www.wildsweden.com/about/facts-about-wolves>   
+
+7.  Fabbri, E., Miquel, C., Lucchini, V., Santini, A., Caniglia, R., Duchamp, C., \... & Randi, E. (2007). From the Apennines to the Alps: colonization genetics of the naturally expanding Italian wolf (Canis lupus) population. Molecular ecology, 16(8), 1661-1671. <https://doi.org/10.1111/j.1365-294X.2007.03262.x>
+
+8.  Finland: International Wolf Center. International Wolf Center \| Teaching the World about Wolves. (2024a, March 12). <https://wolf.org/wow/europe/finland/> (24) 
+
+9.  Kaczensky, P. (1999). Large Carnivore Depredation on Livestock in Europe. Ursus, 11, 59--71.<http://www.jstor.org/stable/3872986>
+
+10. Kecskes, A. (2008). Some questions regarding wolves in Romania. Perspectives of wolves in Central Europe. <https://olomouc.hnutiduha.cz/data/publications/47.pdf#page=27>  
+
+11. Laundré, J. W., Hernández, L., & Altendorf, K. B. (2001). Wolves, elk, and bison: reestablishing the "landscape of fear" in Yellowstone National Park, U.S.A. Canadian Journal of Zoology, 79(8), 1401-1409<https://cdnsciencepub.com/doi/pdf/10.1139/z01-094> 
+
+12. The Wolf in the French Alps. Life Wolfalps EU. (2021, June 8).<https://www.lifewolfalps.eu/en/the-wolf-in-the-alps/the-wolf-in-the-french-alps/> 
+
+13. Martin, M. E. (2020). Keepers of the Wolves [Review of Keepers of the Wolves. 2nd Edition, by R. P. Thiel]. Journal of Mammalogy, 101(2), 613--614.<https://www.jstor.org/stable/27018559> 
+
+14. Meriggi, A., & Lovari, S. (1996). A Review of Wolf Predation in Southern Europe: Does the Wolf Prefer Wild Prey to Livestock? Journal of Applied Ecology, 33(6), 1561--1571.<https://doi.org/10.2307/2404794> 
+
+15. Marucco, F., Pletscher, D. H., Boitani, L., Schwartz, M. K., Pilgrim, K. L., & Lebreton, J.-D. (2009). Wolf Survival and Population Trend Using Non-Invasive Capture---Recapture Techniques in the Western Alps. Journal of Applied Ecology, 46(5), 1003--1010. <http://www.jstor.org/stable/25623080>
+
+16. Mowbray, S. (2017, June 26). A brief history of wolves in Switzerland. Culture Trip. <https://theculturetrip.com/europe/switzerland/articles/a-brief-history-of-wolves-in-switzerland> 
+
+17. Okarma, H., Jȩdrzejewski, W., Schmidt, K., Śnieżko, S., Bunevich, A. N., & Jȩdrzejewska, B. (1998). Home Ranges of Wolves in Białowieża Primeval Forest, Poland, Compared with Other Eurasian Populations. Journal of Mammalogy, 79(3), 842--852. <https://doi.org/10.2307/1383092>  (29)
+
+18. Pulliainen, E. (1965). Studies on the wolf (Canis lupus L.) in Finland. Annales Zoologici Fennici, 2(4), 215--259.<http://www.jstor.org/stable/23730710>) (30)
+
+19. Peter M. Zmyj. (1996). "A Fight to the Finish": The Extermination of the Gray Wolf in Wyoming, 1890-1930. Montana: The Magazine of Western History, 46(1), 14--25.<http://www.jstor.org/stable/4519856> (31)
+
+20. Pierużek-Nowak, S. (n.d.-b). Association for Nature "Wolf." Wolves in Western Poland.<https://www.polskiwilk.org.pl/en/wolf/wolves-in-western-poland> (32)
+
+21. Robbins, J. (2004). Lessons from the WOLF. Scientific American, 290(6), 76--81.<http://www.jstor.org/stable/26047757> (1) 
+
+22. Richardson, C. (2024, March 12). Romania: International wolf center. International Wolf Center \| Teaching the World about Wolves. <https://wolf.org/wow/europe/romania/> (17) 
+
+23. Peterson, R., Drummer, T., & Vucetich, J. (2003). The population biology of Isle Royale Wolves and moose: An overview. Wildlife Monographs.[ ](https://isleroyalewolf.org/data/data/home.html#:~:text=Five%20decades%20of%20wolf%2Dmoose%20dynamics&text=In%201980%20the%20wolf%20population,unexpected%20outbreak%20of%20moose%20ticks.)<https://isleroyalewolf.org/data/data/home.html#:~:text=Five%20decades%20of%20wolf%2Dmoose%20dynamics&text=In%201980%20the%20wolf%20population,unexpected%20outbreak%20of%20moose%20ticks>[.](https://isleroyalewolf.org/data/data/home.html#:~:text=Five%20decades%20of%20wolf%2Dmoose%20dynamics&text=In%201980%20the%20wolf%20population,unexpected%20outbreak%20of%20moose%20ticks.)
+
+24. Save our wolves. WWF. (n.d.). <https://www.wwf.no/dyr-og-natur/truede-arter/ulv-i-norge/rettssak-for-ulven/save-our-wolves>  
+
+25. Sweden: International Wolf Center. International Wolf Center \| Teaching the World about Wolves. (2024, March 12). <https://wolf.org/wow/europe/sweden/>
+
+26. Sin T, Gazzola A, Chiriac S, Rîșnoveanu G (2019) Wolf diet and prey selection in the South-Eastern Carpathian Mountains, Romania. PLOS ONE 14(11): e0225424. <https://doi.org/10.1371/journal.pone.0225424>
+
+27. Switzerland: International Wolf Center. International Wolf Center \| Teaching the World about Wolves. (2024b, March 12). <https://wolf.org/wow/europe/switzerland/>  
+
+28. The Wolf in Slovenia. Life Wolfalps EU. (2021a, July 8). <https://www.lifewolfalps.eu/en/the-wolf-in-the-alps/the-wolf-in-slovenia/#:~:text=From%20then%20on%20the%20expansion,in%20Slovenia%20forming%2014%20packs> 
+
+29. WŁodzimierz Jȩdrzejewski, BogumiŁa Jȩdrzejewska, Henryk Okarma, Krzysztof Schmidt, Karol Zub, Marco Musiani, Prey Selection and Predation by Wolves in BiaŁowieŻa Primeval Forest, Poland, Journal of Mammalogy, Volume 81, Issue 1, February 2000, Pages 197--212, [https://doi.org/10.1644/1545-1542(2000)081\<0197:PSAPBW2.0.CO;2](https://doi.org/10.1644/1545-1542(2000)081%3C0197:PSAPBW%3E2.0.CO;2) 
+
+30. Living planet index. livingplanetindex.org. (n.d.-b). <https://www.livingplanetindex.org/search>
